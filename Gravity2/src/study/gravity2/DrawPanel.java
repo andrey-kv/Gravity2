@@ -17,7 +17,7 @@ public class DrawPanel extends JPanel implements Runnable {
 	public static final Color FIG_COLOR[] = { new Color(255, 165, 0),
 			new Color(0, 168, 107), new Color(8, 37, 103), Color.RED,
 			new Color(186, 36, 184), Color.BLACK };
-	public static final int FIGURES_COUNT = 4;
+	public static final int FIGURES_COUNT = 2;
 
 	private boolean stopThread;
 	private boolean paused = false;
@@ -31,7 +31,7 @@ public class DrawPanel extends JPanel implements Runnable {
 		this.pauseButton = pauseButton;
 		thread = new Thread(this, "MainThread");
 		for (int i = 0; i < figures.length; i++) {
-			figures[i] = new Figure(this);
+			figures[i] = Figure.CreateRandom(this);
 		}
 		pause();
 		thread.start();
