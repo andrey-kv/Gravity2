@@ -1,6 +1,5 @@
 package study.gravity2;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.RoundRectangle2D;
 
@@ -8,10 +7,6 @@ public class Rounded extends Figure {
 
 	public Rounded(DrawPanel drawPanel) {
 		super(drawPanel);
-	}
-
-	public Rounded(DrawPanel drawPanel, int size, Color color) {
-		super(drawPanel, size, color);
 	}
 
 	@Override

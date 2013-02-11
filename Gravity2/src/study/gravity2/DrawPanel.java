@@ -1,6 +1,5 @@
 package study.gravity2;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -14,10 +13,8 @@ import javax.swing.JPanel;
 public class DrawPanel extends JPanel implements Runnable {
 
 	private static final long serialVersionUID = 1L;
-	public static final Color FIG_COLOR[] = { new Color(255, 165, 0),
-			new Color(0, 168, 107), new Color(8, 37, 103), Color.RED,
-			new Color(186, 36, 184), Color.BLACK };
 	public static final int FIGURES_COUNT = 2;
+	private static final boolean FIGURES_RANDOM = false;
 
 	private boolean stopThread;
 	private boolean paused = false;
@@ -30,8 +27,24 @@ public class DrawPanel extends JPanel implements Runnable {
 		super();
 		this.pauseButton = pauseButton;
 		thread = new Thread(this, "MainThread");
-		for (int i = 0; i < figures.length; i++) {
-			figures[i] = Figure.CreateRandom(this);
+		if (FIGURES_RANDOM) {
+			for (int i = 0; i < figures.length; i++) {
+				figures[i] = Figure.CreateRandom(this);
+				figures[i].setRandomStartParameters();
+			}
+		} else {
+			figures[0] = Figure.Create(this, Figure.FIGURE_CIRCLE);
+			figures[0].setLocation(100, 100);
+			figures[0].setFigureSize(24);
+			figures[0].setColor(2);
+			figures[0].setFill(false);
+			figures[0].defineMotion(100, Math.toRadians(45));
+			
+			figures[1] = Figure.Create(this, Figure.FIGURE_CIRCLE);
+			figures[1].setLocation(150, 100);
+			figures[1].defineMotion(80, Math.toRadians(20));
+			figures[1].setColor(3);
+			figures[1].setFill(false);
 		}
 		pause();
 		thread.start();

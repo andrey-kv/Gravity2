@@ -5,67 +5,96 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Shape;
+import java.util.Random;
 
 public abstract class Figure {
 
-	public int figureSize;
+	public static final int FIGURE_CIRCLE = 0;
+	public static final int FIGURE_SQUARE = 1;
+	public static final int FIGURE_ROUNDED = 2;
+	public static final Color FIGURE_COLOR[] = { new Color(255, 165, 0),
+		new Color(0, 168, 107), new Color(8, 37, 103), Color.RED,
+		new Color(186, 36, 184), Color.BLACK };
+	private int figureSize = 20;
 	private Point currentPoint = new Point(figureSize / 2 + 2,
 			figureSize / 2 + 2);
 	private Mechanics mechanics = new Mechanics();
 	private boolean stopped = true;
 	private boolean fill = true;
-	Color color;
+	private Color color = Color.BLACK;
 	DrawPanel drawPanel;
 
 	Figure(DrawPanel drawPanel) {
 		this.drawPanel = drawPanel;
-		this.figureSize = getRandom(16, 32);
-		this.color = DrawPanel.FIG_COLOR[getRandom(0,
-				DrawPanel.FIG_COLOR.length - 1)];
-		int startX = getRandom(figureSize, 320);
-		int startY = getRandom(figureSize, 280);
-		int startSpeed = getRandom(50, 200);
-		int startAngle = getRandom(-180, 180);
-		fill = getRandom();
-		setLocation(startX, startY);
-		pull(startSpeed, Math.toRadians(startAngle));
 	}
-
-	Figure(DrawPanel drawPanel, int size, Color color) {
-		this.drawPanel = drawPanel;
-		this.figureSize = size;
-		this.color = color;
+	
+	public void defineMotion(double speed, double angle) {
+		mechanics.setStartPoint(currentPoint);
+		mechanics.speed.setVector(speed, angle);
+	}
+	
+	/* ------ Define figure's color -----------------------*/
+	public void setColor(int colorNumber) {
+		if (colorNumber < 0 || colorNumber >= FIGURE_COLOR.length) {
+			colorNumber = 0;
+		}
+		this.color = FIGURE_COLOR[colorNumber];
+	}
+	public void setColor(Color c) {
+		this.color = c;
+	}
+	/* ----------------------------------------------------*/
+	
+	/* ------ Define figure's size ------------------------*/
+	public int getFigureSize() {
+		return figureSize;
+	}
+	public void setFigureSize(int figureSize) {
+		this.figureSize = figureSize;
+	}
+	/* ----------------------------------------------------*/
+	
+	public void setFill(boolean fill) {
+		this.fill = fill;
+	}
+	
+	public void setRandomStartParameters() {
+		Random rnd = new Random();
+		setFigureSize(16+rnd.nextInt(17));
+		setColor(rnd.nextInt(FIGURE_COLOR.length));
+		int startX = getFigureSize()+rnd.nextInt(300);
+		int startY = getFigureSize()+rnd.nextInt(300);
+		int startSpeed = 50 + rnd.nextInt(150);
+		int startAngle = -180 + rnd.nextInt(360);
+		setFill(rnd.nextBoolean());
+		setLocation(startX, startY);
+		defineMotion(startSpeed, Math.toRadians(startAngle));
 	}
 
 	public void draw(Graphics2D g2) {
 		Point p = getLocation();
-		int currentX = p.x - (figureSize / 2);
-		int currentY = p.y - (figureSize / 2);
+		int currentX = p.x - (getFigureSize() / 2);
+		int currentY = p.y - (getFigureSize() / 2);
 		g2.setColor(color);
 		if (fill) {
-			g2.fill(getShape(currentX, currentY, figureSize));
+			g2.fill(getShape(currentX, currentY, getFigureSize()));
 		} else {
 			g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND,
 					BasicStroke.JOIN_ROUND));
-			g2.draw(getShape(currentX, currentY, figureSize));
+			g2.draw(getShape(currentX, currentY, getFigureSize()));
 		}
 	}
 
 	public abstract Shape getShape(double currentX, double currentY, double figureSize);
 
-	public void pull(double speed, double angle) {
-		mechanics.setStartPoint(currentPoint);
-		mechanics.speed.setVector(speed, angle);
+	public void pullFromPoint(Point pullPoint, double coefficient) {
+		double speed = distance(pullPoint) * coefficient;
+		double angle = getAzimuthTo(pullPoint);
+		defineMotion(speed, angle);
 		if (stopped) {
 			unFreeze();
 		}
 		stopped = false;
-	}
-
-	public void pullFromPoint(Point pullPoint, double coefficient) {
-		double speed = distance(pullPoint) * coefficient;
-		double angle = getAzimuthTo(pullPoint);
-		pull(speed, angle);
 	}
 
 	private double getAzimuthTo(Point point2) {
@@ -113,7 +142,7 @@ public abstract class Figure {
 	}
 
 	public boolean isPointInside(int x, int y) {
-		return (currentPoint.distance(x, y) < figureSize / 2 - 2);
+		return (currentPoint.distance(x, y) < getFigureSize() / 2 - 2);
 	}
 
 	public double distance(int x, int y) {
@@ -137,20 +166,20 @@ public abstract class Figure {
 		mechanics.calculateNextSpeed();
 		if (mechanics.nextSpeed.getValue() == 0)
 			return;
-		if (mechanics.nextCoord.x < (figureSize / 2 + 1)
+		if (mechanics.nextCoord.x < (getFigureSize() / 2 + 1)
 				&& mechanics.nextSpeed.getVectorX() < 0) {
 			mechanics.reflect(Mechanics.VERTICAL);
 		}
-		if (mechanics.nextCoord.x > drawPanel.getWidth() - (figureSize / 2 + 1)
+		if (mechanics.nextCoord.x > drawPanel.getWidth() - (getFigureSize() / 2 + 1)
 				&& mechanics.nextSpeed.getVectorX() >= 0) {
 			mechanics.reflect(Mechanics.VERTICAL);
 		}
-		if (mechanics.nextCoord.y < (figureSize / 2 + 1)
+		if (mechanics.nextCoord.y < (getFigureSize() / 2 + 1)
 				&& mechanics.nextSpeed.getVectorY() < 0) {
 			mechanics.reflect(Mechanics.HORISONTAL);
 		}
 		if (mechanics.nextCoord.y > drawPanel.getHeight()
-				- (figureSize / 2 + 1)
+				- (getFigureSize() / 2 + 1)
 				&& mechanics.nextSpeed.getVectorY() >= 0) {
 			mechanics.reflect(Mechanics.HORISONTAL);
 		}
@@ -171,8 +200,8 @@ public abstract class Figure {
 	}
 
 	private void reflectWithA(Figure fig) {
-		if (getLocation().distance(fig.getLocation()) < figureSize / 2
-				+ fig.figureSize / 2) {
+		if (getLocation().distance(fig.getLocation()) < getFigureSize() / 2
+				+ fig.getFigureSize() / 2) {
 			Vector2D relSpeed = mechanics.speed.subVector(fig.mechanics.speed);
 			double relativeSpeedAngle = relSpeed.getAngle();
 			double relativeDistanceAngle = getAzimuthTo(fig.getLocation());
@@ -188,27 +217,20 @@ public abstract class Figure {
 		}
 	}
 
-	// Возвращает случайное целое в промежутке от min до max.
-	private static int getRandom(int min, int max) {
-		return min + (int) Math.round(((max - min) * Math.random()));
+	public static Figure CreateRandom(DrawPanel dp) {
+		Random rnd = new Random();
+		return Create(dp, rnd.nextInt(3));
 	}
-
-	private static boolean getRandom() {
-		return (Math.random() > 0.5) ;
+	public static Figure Create(DrawPanel dp, int fig) {
+		switch (fig) {
+		case FIGURE_SQUARE:
+			return new Square(dp);
+		case FIGURE_ROUNDED:
+			return new Rounded(dp);
+		default:
+			return new Ring(dp);
+		}
 	}
 	
-	// Для создания конкретной случайной фигуры используем фабричный метод
-	public static Figure CreateRandom(DrawPanel dp) {
-		int fig = getRandom(0, 2);
-		switch (fig) {
-		case 0:
-			return new Ring(dp);
-		case 1:
-			return new Square(dp);
-		case 2:
-			return new Rounded(dp);
-		}
-		return null;
-	}
 
 }
